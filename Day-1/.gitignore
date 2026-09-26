@@ -1,0 +1,12 @@
+# Local .terraform directories
+**/.terraform/*
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Terraform lock file
+.terraform.lock.hcl
+# documents
+*.doc
+terraform-provider-aws_v6.66.0_x5.exe
