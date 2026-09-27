@@ -161,3 +161,54 @@ resource "aws_subnet" "subnet4" {
     Name = var.subnet4_name
   }
 }
+resource "aws_instance" "private_instance" {
+  ami           = "ami-0fef201115eefe936"
+  instance_type = "t2.medium"
+  subnet_id     = aws_subnet.subnet4.id
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+  iam_instance_profile = aws_iam_instance_profile.my_instance_profile.name
+  tags = {
+    Name = "private-instance"
+  }
+}
+resource "aws_iam_role" "my_role" {
+  name = "my-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+          
+        }
+      },
+    ]
+  })
+}
+resource "aws_iam_instance_profile" "my_instance_profile" {
+  name = "my-instance-profile"
+  role = aws_iam_role.my_role.name
+}
+resource "aws_iam_role_policy_attachment" "my_role_policy_attachment" {
+  role       = aws_iam_role.my_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+# Assuming you already have your instance defined, e.g., aws_instance.private_instance
+
+resource "null_resource" "reboot_ec2" {
+  # The 'triggers' block determines when this script should run. 
+  # Using timestamp() will force a reboot EVERY time you run 'terraform apply'.
+  # To control it manually, you can change this to a specific variable or omit it to run only once upon creation.
+  triggers = {
+    reboot_trigger = timestamp() 
+  }
+
+  provisioner "local-exec" {
+    # Replace the region with your actual AWS region (e.g., ap-south-1, us-east-1)
+    command = "aws ec2 reboot-instances --instance-ids ${aws_instance.private_instance.id} --region us-east-1"  
+    }
+}
+
