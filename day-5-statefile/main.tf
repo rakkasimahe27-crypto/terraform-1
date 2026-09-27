@@ -88,3 +88,29 @@ resource "aws_s3_bucket_versioning" "my_bucket" {
     status = "Enabled"
   }
 }
+resource "aws_nat_gateway" "my_nat_gateway" {
+  allocation_id = aws_eip.my_eip.id
+  subnet_id     = aws_subnet.subnet1.id
+
+  tags = {
+    Name = "MyNATGateway"
+  }
+}
+resource "aws_eip" "my_eip" {
+  domain = "vpc"
+
+  tags = {
+    Name = "MyEIP"
+  }
+}
+resource "aws_instance" "my_instance2" {
+  ami           = "ami-0fef201115eefe936"
+  instance_type = "t2.micro"
+  associate_public_ip_address = true
+  subnet_id     = aws_subnet.subnet2.id
+  vpc_security_group_ids = [aws_security_group.allow_ssh.id]
+
+  tags = {
+    Name = "MyInstance2"
+  }
+}
