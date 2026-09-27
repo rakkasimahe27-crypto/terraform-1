@@ -74,7 +74,7 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "my-unique-bucket-nhi-71246"
+  bucket = "my-unique-bucket-puooli-71246"
 
   tags = {
     Name        = "MyBucket"
