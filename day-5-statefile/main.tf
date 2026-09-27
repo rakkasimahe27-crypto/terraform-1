@@ -81,3 +81,10 @@ resource "aws_s3_bucket" "my_bucket" {
     Environment = "Dev"
   }
 }
+resource "aws_s3_bucket_versioning" "my_bucket" {
+  bucket = aws_s3_bucket.my_bucket.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
