@@ -1,0 +1,6 @@
+vpc_cidr = "192.0.0.0/16"
+vpc_name = "my-vpc"
+subnet_cidr = "192.0.0.0/24"
+subnet_name = "my-subnet"
+subnet2_cidr = "192.0.1.0/24"
+subnet2_name = "my-subnet-2"
