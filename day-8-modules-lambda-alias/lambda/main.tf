@@ -34,4 +34,4 @@ resource "aws_lambda_function" "my_lambda" {
   #Without source_code_hash, Terraform might not detect when the code in the ZIP file has changed — meaning your Lambda might not update even after uploading a new ZIP.
 
 #This hash is a checksum that triggers a deployment.
-}
+}  
