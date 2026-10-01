@@ -336,3 +336,146 @@ resource "aws_instance" "mahe_backend_server" {
     Name = "mahe-backend-server"
   }
 }
+# =========================================================
+# Frontend Target Group
+# =========================================================
+
+resource "aws_lb_target_group" "mahe_frontend_tg" {
+  name     = "mahe-frontend-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.mahe_vpc.id
+
+  target_type = "instance"
+
+  health_check {
+    enabled             = true
+    protocol            = "HTTP"
+    path                = "/"
+    port                = "traffic-port"
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+    timeout             = 5
+    interval            = 30
+    matcher             = "200"
+  }
+
+  tags = {
+    Name = "mahe-frontend-tg"
+  }
+}
+# =========================================================
+# Frontend Application Load Balancer
+# =========================================================
+
+resource "aws_lb" "mahe_frontend_alb" {
+  name               = "mahe-frontend-alb"
+  internal           = false
+  load_balancer_type = "application"
+
+  security_groups = [
+    aws_security_group.mahe_alb_sg.id
+  ]
+
+  subnets = [
+    aws_subnet.mahe_public_subnet_1.id,
+    aws_subnet.mahe_public_subnet_2.id
+  ]
+
+  tags = {
+    Name = "mahe-frontend-alb"
+  }
+}
+# =========================================================
+# Frontend ALB Listener
+# =========================================================
+
+resource "aws_lb_listener" "mahe_frontend_listener" {
+  load_balancer_arn = aws_lb.mahe_frontend_alb.arn
+
+  port     = 80
+  protocol = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.mahe_frontend_tg.arn
+  }
+}
+# =========================================================
+# Frontend Launch Template
+# =========================================================
+
+resource "aws_launch_template" "mahe_frontend_lt" {
+  name_prefix   = "mahe-frontend-"
+  image_id      = "ami-0d53cc9bd365ad65b"
+  instance_type = "t2.medium"
+
+  vpc_security_group_ids = [
+    aws_security_group.mahe_frontend_sg.id
+  ]
+
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+
+    dnf update -y
+
+    dnf install nginx -y
+
+    systemctl enable nginx
+    systemctl start nginx
+
+    echo "<html>
+    <body>
+    <h1>Mahe Frontend Server</h1>
+    <h2>Running behind Application Load Balancer</h2>
+    </body>
+    </html>" > /usr/share/nginx/html/index.html
+  EOF
+  )
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = "mahe-frontend-asg"
+    }
+  }
+}
+# =========================================================
+# Frontend Auto Scaling Group
+# =========================================================
+
+resource "aws_autoscaling_group" "mahe_frontend_asg" {
+  name = "mahe-frontend-asg"
+
+  min_size         = 2
+  max_size         = 4
+  desired_capacity = 2
+
+  health_check_type         = "ELB"
+  health_check_grace_period = 120
+
+  vpc_zone_identifier = [
+    aws_subnet.mahe_private_subnet_1.id,
+    aws_subnet.mahe_private_subnet_2.id
+  ]
+
+  target_group_arns = [
+    aws_lb_target_group.mahe_frontend_tg.arn
+  ]
+
+  launch_template {
+    id      = aws_launch_template.mahe_frontend_lt.id
+    version = "$Latest"
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "mahe-frontend-asg"
+    propagate_at_launch = true
+  }
+
+  depends_on = [
+    aws_lb_listener.mahe_frontend_listener
+  ]
+}
