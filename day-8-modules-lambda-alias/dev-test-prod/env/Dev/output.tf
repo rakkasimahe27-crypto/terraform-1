@@ -7,6 +7,7 @@ output "privateip" {
 output "instanceid" {
   value = [
     module.instance.instance_id,
-    module.instance1.instance_id
+    module.instance1.instance_id,
+    module.instance2.instance_id
   ]
 }

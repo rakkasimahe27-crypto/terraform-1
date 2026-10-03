@@ -13,3 +13,11 @@ variable "subnet_id" {
 variable "instance_name" {
   type = string
 }
+
+variable "security_group_ids" {
+  type = list(string)
+}
+
+variable "key_name" {
+  type = string
+}
