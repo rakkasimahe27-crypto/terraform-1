@@ -3,20 +3,20 @@ module "network" {
     vpc_cidr = "10.0.0.0/16"
     vpc_name = "my-vpc"
     subnet_cidr = "10.0.1.0/24"
-    subnet_az = "us-west-2a"
+    subnet_az = "us-east-1a"
     subnet_name = "my-subnet"
 }
 module "instance" {
     source = "./modules/compute"
     subnet_id = module.network.subnet_id
-    ami_id = "ami-075d448db8fb256af"
+    ami_id = "ami-0d27e0fb3bac4d724"
     instance_type = "t2.micro"
     instance_name = "mahesh-instance"
 }
 module "instance1" {
     source = "./modules/compute"
     subnet_id = module.network.subnet_id
-    ami_id = "ami-075d448db8fb256af"
+    ami_id = "ami-0d27e0fb3bac4d724"
     instance_type = "t2.medium"
     instance_name = "mahesh-instance1"
 }
