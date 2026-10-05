@@ -1,25 +1,22 @@
-name: Terraform Deploy
+name: Simple Terraform Deploy
 
 on:
-  # push:
-  #   branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual trigger from the Actions tab
 
-# 1. Global permissions required for GitHub to request the OIDC token from AWS
+# Required for GitHub to request the OIDC token from AWS
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  plan:
-    name: Terraform Plan
+  deploy:
+    name: Provision Infrastructure
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Configure AWS credentials before running Terraform commands
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -31,46 +28,9 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
-
-      - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan
-          path: tfplan
-
-  apply:
-    name: Terraform Apply
-    runs-on: ubuntu-latest
-    needs: plan
-    environment: production   # 👈 requires manual approval in GitHub settings
-      
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # 3. The Apply job must use the EXACT SAME role as the plan job
-      - name: Configure AWS Credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::730335391385:role/cicd-pipeline
-          aws-region: us-west-2
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Download Plan Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-
-      - name: Terraform Init
-        run: terraform init
+        run: terraform plan
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve
