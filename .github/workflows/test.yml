@@ -54,11 +54,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 3. The Apply job runs on a separate machine, so it also needs the OIDC step
+      # 3. The Apply job must use the EXACT SAME role as the plan job
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::730335391385:role/OIDC-role
+          role-to-assume: arn:aws:iam::730335391385:role/cicd-pipeline
           aws-region: us-west-2
 
       - name: Setup Terraform
