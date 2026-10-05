@@ -33,6 +33,32 @@ resource "aws_route_table_association" "rta" {
     subnet_id = aws_subnet.subnet1.id
     route_table_id = aws_route_table.rt.id
 }
-resource "aws_s3_bucket" "name" {
-    bucket = "terraform-day-2-88ucket"
+resource "aws_security_group" "sg" {
+    name = "terraform-day-2-sg"
+    description = "Allow SSH and HTTP"
+    vpc_id = aws_vpc.name.id
+
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    egress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+resource "aws_instance" "web" {
+    ami = "ami-0d53cc9bd365ad65b"
+    instance_type = "t2.micro"
+    subnet_id = aws_subnet.subnet1.id
+    vpc_security_group_ids = [aws_security_group.sg.id]
+    key_name = "jenkins"
+    tags = {
+        Name = "terraform-day-2-instance"
+    }
 }
