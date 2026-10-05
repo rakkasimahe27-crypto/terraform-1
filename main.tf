@@ -57,7 +57,6 @@ resource "aws_instance" "web" {
     instance_type = "t2.micro"
     subnet_id = aws_subnet.subnet1.id
     vpc_security_group_ids = [aws_security_group.sg.id]
-    key_name = "jenkins"
     tags = {
         Name = "terraform-day-2-instance"
     }
