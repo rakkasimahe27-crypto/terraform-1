@@ -9,20 +9,20 @@ module "network" {
 module "instance" {
     source = "./modules/compute"
     subnet_id = module.network.subnet_id
-    ami_id = "ami-0d27e0fb3bac4d724"
+    ami_id = "ami-0d53cc9bd365ad65b"
     instance_type = "t2.micro"
     instance_name = "mahesh-instance"
 }
 module "instance1" {
     source = "./modules/compute"
     subnet_id = module.network.subnet_id
-    ami_id = "ami-0d27e0fb3bac4d724"
+    ami_id = "ami-0d53cc9bd365ad65b"
     instance_type = "t2.medium"
     instance_name = "mahesh-instance1"
 }
 module "s3" {
     source = "./modules/s3"
-    bucket_name = "mahesh-bucket-88934567890"
+    bucket_name = "mahesh-bucket-88000934567890"
     bucket_acl = "private"
     environment = "dev"
     versioning_status = "Enabled"
