@@ -11,18 +11,18 @@ module "instance" {
     subnet_id = module.network.subnet_id
     ami_id = "ami-0d53cc9bd365ad65b"
     instance_type = "t2.medium"
-    instance_name = "slave-2"
+    instance_name = "slave-99"
 }
 module "instance1" {
     source = "./modules/compute"
     subnet_id = module.network.subnet_id
     ami_id = "ami-0d53cc9bd365ad65b"
     instance_type = "t2.medium"
-    instance_name = "slave-0"
+    instance_name = "slave-99"
 }
 module "s3" {
     source = "./modules/s3"
-    bucket_name = "mahesh-bucket-rak67890"
+    bucket_name = "mahesh-bucket-opk67890"
     bucket_acl = "private"
     environment = "dev"
     versioning_status = "Enabled"
