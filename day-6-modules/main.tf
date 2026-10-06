@@ -22,7 +22,7 @@ module "instance1" {
 }
 module "s3" {
     source = "./modules/s3"
-    bucket_name = "mahesh-bucket-909734567890"
+    bucket_name = "mahesh-bucket-rakk734567890"
     bucket_acl = "private"
     environment = "dev"
     versioning_status = "Enabled"
