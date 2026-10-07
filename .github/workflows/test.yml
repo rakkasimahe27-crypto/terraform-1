@@ -1,36 +1,80 @@
-name: Simple Terraform Deploy
-
+name: Terraform Deployment
 on:
-  workflow_dispatch: # Allows manual trigger from the Actions tab
-
-# Required for GitHub to request the OIDC token from AWS
+  push:
+    branches: [main]
+    
 permissions:
   id-token: write
   contents: read
-
+  
 jobs:
-  deploy:
-    name: Provision Infrastructure
+  plan:
+    name: Terraform Plan
     runs-on: ubuntu-latest
+    environment: development
+
+    env:
+      WORKSPACE_NAME: development
 
     steps:
-      - name: Checkout Code
+      - name: checkout
         uses: actions/checkout@v4
-
-      - name: Configure AWS Credentials via OIDC
+        
+      - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::730335391385:role/cicd-pipeline
-          aws-region: us-west-2
-
+          role-to-assume: arn:aws:iam::515601297142:role/cicd
+          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+          
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        
+      - name: Terraform init
+        run: terraform init
+      
+      - name: Terraform Workspace
+        run: terraform workspace select ${{ env.WORKSPACE_NAME }} || terraform workspace new ${{ env.WORKSPACE_NAME }}
+        
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: tfplan
 
-      - name: Terraform Init
+  apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs: plan
+    environment: development
+    env:
+      WORKSPACE_NAME: development
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::515601297142:role/cicd
+          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        
+      - name: Terraform init
         run: terraform init
 
-      - name: Terraform Plan
-        run: terraform plan
-
+      - name: Terraform Workspace
+        run: terraform workspace select ${{ env.WORKSPACE_NAME }} || terraform workspace new ${{ env.WORKSPACE_NAME }}
+        
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve tfplan
