@@ -53,7 +53,7 @@ resource "aws_security_group" "sg" {
     }
 }
 resource "aws_instance" "web" {
-    ami = "ami-0d53cc9bd365ad65b"
+    ami = "ami-0d27e0fb3bac4d724"
     instance_type = "t2.micro"
     subnet_id = aws_subnet.subnet1.id
     vpc_security_group_ids = [aws_security_group.sg.id]
