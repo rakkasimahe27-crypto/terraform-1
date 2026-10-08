@@ -5,13 +5,19 @@ resource "aws_vpc" "name" {
     }
   
 }
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
 resource "aws_subnet" "subnet1" {
-    vpc_id = aws_vpc.name.id
-    cidr_block = var.subnet1_cidr_block
-    availability_zone = "us-west-2a"
-    tags = {
-        Name = var.subnet1_name
-    }
+  vpc_id            = aws_vpc.name.id    
+  cidr_block        = var.subnet1_cidr_block
+
+  availability_zone = data.aws_availability_zones.available.names[0]
+
+  tags = {
+    Name = var.subnet1_name
+  }
 }
 resource "aws_internet_gateway" "igw" {
     vpc_id = aws_vpc.name.id
