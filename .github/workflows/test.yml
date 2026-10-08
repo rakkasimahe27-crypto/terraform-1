@@ -23,7 +23,7 @@ jobs:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::515601297142:role/cicd
+          role-to-assume: arn:aws:iam::313941175507:role/cicd
           aws-region: ${{ vars.AWS_DEFAULT_REGION }}
           
       - name: Setup Terraform
