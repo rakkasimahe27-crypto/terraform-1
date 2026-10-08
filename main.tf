@@ -60,7 +60,6 @@ resource "aws_instance" "web" {
     tags = {
         Name = "terraform-day-2-instance"
     }
-    depends_on = [aws_ami.amazon_linux]
 }
 
 data "aws_ami" "amazon_linux" {
