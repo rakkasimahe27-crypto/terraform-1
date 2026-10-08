@@ -11,10 +11,10 @@ jobs:
   plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
-    environment: development
+    environment: production
 
     env:
-      WORKSPACE_NAME: development
+      WORKSPACE_NAME: production
 
     steps:
       - name: checkout
@@ -48,9 +48,9 @@ jobs:
     name: Terraform Apply
     runs-on: ubuntu-latest
     needs: plan
-    environment: development
+    environment: production
     env:
-      WORKSPACE_NAME: development
+      WORKSPACE_NAME: production
 
     steps:
       - name: checkout
