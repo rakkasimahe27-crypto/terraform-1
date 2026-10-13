@@ -45,24 +45,25 @@ resource "aws_security_group" "sg" {
     vpc_id = aws_vpc.name.id
 
     ingress {
-        from_port = 22
-        to_port = 22
+        from_port = 0
+        to_port = 65535
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
 
     egress {
-        from_port = 22
-        to_port = 22
+        from_port = 0
+        to_port = 65535
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
 }
 resource "aws_instance" "web" {
     ami = data.aws_ami.amazon_linux.id
-    instance_type = "t2.micro"
+    instance_type = "t2.medium"
     subnet_id = aws_subnet.subnet1.id
     vpc_security_group_ids = [aws_security_group.sg.id]
+    associate_public_ip_address = true
     tags = {
         Name = "terraform-day-2-instance"
     }

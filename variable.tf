@@ -18,6 +18,6 @@ variable "subnet1_cidr_block" {
 variable "subnet1_name" {
   description = "The name of the first subnet"
   type        = string
-  default     = "Mahe-subnet1"
+  default     = "e-subnet1"
 
 }
