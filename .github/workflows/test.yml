@@ -33,7 +33,7 @@ jobs:
           args: >
             -Dsonar.projectKey=terraform-1
             -Dsonar.projectName=terraform-1
-            -Dsonar.sources=.
+            -Dsonar.sources=day-6-modules
 
 
   # =========================================================
@@ -47,6 +47,11 @@ jobs:
 
     env:
       WORKSPACE_NAME: development
+
+    # Set the working directory for all run steps in this job
+    defaults:
+      run:
+        working-directory: ./day-6-modules
 
     steps:
       - name: Checkout
@@ -68,7 +73,7 @@ jobs:
         run: |
           terraform workspace select ${{ env.WORKSPACE_NAME }} || \
           terraform workspace new ${{ env.WORKSPACE_NAME }}
-
+        
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
@@ -76,7 +81,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
-          path: tfplan
+          path: ./day-6-modules/tfplan
 
 
   # =========================================================
@@ -90,6 +95,11 @@ jobs:
 
     env:
       WORKSPACE_NAME: development
+
+    # Set the working directory for all run steps in this job
+    defaults:
+      run:
+        working-directory: ./day-6-modules
 
     steps:
       - name: Checkout
@@ -116,6 +126,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tfplan
+          path: ./day-6-modules
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
