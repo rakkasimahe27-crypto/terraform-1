@@ -10,6 +10,7 @@ permissions:
   contents: read
 
 jobs:
+
   # =========================================================
   # 1. TERRAFORM PLAN
   # =========================================================
@@ -17,18 +18,31 @@ jobs:
     name: Terraform Plan
     runs-on: ubuntu-latest
     environment: development
+
+    env:
+      WORKSPACE_NAME: development
+
     defaults:
       run:
         working-directory: ./test2
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug OIDC claims
+        run: |
+          TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+          PAYLOAD=$(echo "$TOKEN" | cut -d. -f2 | tr '_-' '/+')
+          while [ $(( ${#PAYLOAD} % 4 )) -ne 0 ]; do PAYLOAD="${PAYLOAD}="; done
+          echo "$PAYLOAD" | base64 -d | jq '{sub, aud, iss}'
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::255754134813:role/mahe
-          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+          aws-region: us-west-2
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -38,8 +52,8 @@ jobs:
 
       - name: Terraform Workspace
         run: |
-          terraform workspace select ${{ vars.WORKSPACE_NAME }} || \
-          terraform workspace new ${{ vars.WORKSPACE_NAME }}
+          terraform workspace select ${{ env.WORKSPACE_NAME }} || \
+          terraform workspace new ${{ env.WORKSPACE_NAME }}
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
@@ -50,6 +64,7 @@ jobs:
           name: tfplan
           path: ./test2/tfplan
 
+
   # =========================================================
   # 2. TERRAFORM APPLY
   # =========================================================
@@ -58,18 +73,31 @@ jobs:
     runs-on: ubuntu-latest
     needs: plan
     environment: development
+
+    env:
+      WORKSPACE_NAME: development
+
     defaults:
       run:
         working-directory: ./test2
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug OIDC claims
+        run: |
+          TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+          PAYLOAD=$(echo "$TOKEN" | cut -d. -f2 | tr '_-' '/+')
+          while [ $(( ${#PAYLOAD} % 4 )) -ne 0 ]; do PAYLOAD="${PAYLOAD}="; done
+          echo "$PAYLOAD" | base64 -d | jq '{sub, aud, iss}'
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::255754134813:role/mahe
-          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+          aws-region: us-west-2
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -79,8 +107,8 @@ jobs:
 
       - name: Terraform Workspace
         run: |
-          terraform workspace select ${{ vars.WORKSPACE_NAME }} || \
-          terraform workspace new ${{ vars.WORKSPACE_NAME }}
+          terraform workspace select ${{ env.WORKSPACE_NAME }} || \
+          terraform workspace new ${{ env.WORKSPACE_NAME }}
 
       - name: Download Terraform Plan
         uses: actions/download-artifact@v4
